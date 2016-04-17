@@ -1,0 +1,13 @@
+{
+  "name": "voronoi",
+  "private": true,
+  "dependencies": {
+    "modernizr": "~2.8.3",
+    "d3": "^3.5.16",
+    "d3-voronoi": "^0.3.2"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  }
+}
