@@ -41,7 +41,7 @@ function resize() {
 
 }
 
-function continousMoving() {
+function moveVertices(vertices) {
     vertices = vertices.map(function(e) {
         var p = e.point;
         p[0] += e.vx;
@@ -53,26 +53,27 @@ function continousMoving() {
 
         return {
             point: p,
-            vx: e.vx + (0.1 * (Math.random() - .5) - 0.0001 * e.vx),
+            vx: e.vx + (0.1 * (Math.random() - .5) - 0.001 * e.vx),
             vy: e.vy + (0.1 * (Math.random() - .5) - 0.001 * e.vy)
         };
     });
+    return vertices;
 
-    verticesG.selectAll("circle")
-        .transition()
-        .attr("transform", function(d, i) {
-            d = vertices[i];
-            return "translate(" + d.point + ")";
-        })
-        .duration(30)
-        .attr("r", r)
-        .each('end', function() {
-            continousMoving();
-        });
+    /*    verticesG.selectAll("circle")
+            .transition()
+            .attr("transform", function(d, i) {
+                d = vertices[i];
+                return "translate(" + d.point + ")";
+            })
+            .duration(30)
+            .attr("r", r)
+            .each('end', function() {
+                continousMoving();
+            });*/
 }
 
 /* Build n points */
-var n = 7,
+var n = 6,
     bloques = new Array(n);
 
 var vertices = d3.range(n).map(function(d) {
@@ -86,14 +87,14 @@ var vertices = d3.range(n).map(function(d) {
 
 
 var voronoi = new Voronoi();
+var bbox, sites;
 
 function buildVoronoi(vertices) {
-    var bbox = { xl: 0, xr: width, yt: 0, yb: height }; // xl is x-left, xr is x-right, yt is y-top, and yb is y-bottom
+    bbox = { xl: 0, xr: width, yt: 0, yb: height }; // xl is x-left, xr is x-right, yt is y-top, and yb is y-bottom
 
-    var sites = vertices.map(function(e) {
+    sites = vertices.map(function(e) {
         return { x: e.point[0], y: e.point[1] }
     });
-
     var diagram = voronoi.compute(sites, bbox);
 
     return diagram;
@@ -104,24 +105,6 @@ var diagram = buildVoronoi(vertices);
 drawVoronoiDiagram(diagram);
 
 
-
-/*var polygons = [];
-var path = svg.append("g").selectAll("path");
-
-diagram.cells.map(function(cell) {
-    var p = [];
-    var v = cell.halfedges[0].getStartpoint();
-    p.push([v.x, v.y]);
-    cell.halfedges.map(function(hE) {
-        console.log(hE);
-        v = hE.getEndpoint();
-        p.push([v.x, v.y]);
-        return
-    });
-    polygons.push(p);
-});
-
-*/
 function drawVoronoiDiagram(diagram) {
 
     var polygons = [];
@@ -131,7 +114,6 @@ function drawVoronoiDiagram(diagram) {
         var v = cell.halfedges[0].getStartpoint();
         p.push([v.x, v.y]);
         cell.halfedges.map(function(hE) {
-            console.log(hE);
             v = hE.getEndpoint();
             p.push([v.x, v.y]);
             return
@@ -139,12 +121,10 @@ function drawVoronoiDiagram(diagram) {
         polygons.push(p);
     });
     drawPolygon(polygons);
+    drawSites(sites);
 
     return polygons;
 }
-
-
-
 
 // drawPolygon(polygons);
 
@@ -156,7 +136,6 @@ function drawSites(sites) {
         .enter()
         .append("g")
         .attr("transform", function(d, i) {
-            console.log(i, d);
             return "translate(" + d.x + ',' + d.y + ")";
         })
         .append("circle")
@@ -203,4 +182,37 @@ function polygonF(d) {
     return "M" + d.join("L") + "Z";
 }
 
-//drawSites(sites);
+/* Animación continua*/
+function continousM(elapsed) {
+    svg.selectAll("g").remove();
+    // console.log(elapsed - total_time);
+    console.log('c');
+    total_time = elapsed;
+    vertices = moveVertices(vertices);
+/*    sites = vertices.map(function(e) {
+        return { x: e.point[0], y: e.point[1] }
+    });
+    drawSites(sites);
+*/
+     diagram = buildVoronoi(vertices);
+     drawVoronoiDiagram(diagram);
+}
+
+var total_time;
+var timer = d3_timer.timer(continousM);
+
+svg.on("mouseenter", flash("mouseenter", "-1em"))
+    .on("mouseover", flash("mouseover", "0"))
+    .on("mouseout",  flash("mouseout", "1em"))
+    .on("mouseleave", flash("mouseleave", "2em"));
+
+function flash(name, dy) {
+   // timer.stop();
+  return function() {
+    if(name==="mouseenter"){timer.stop();}
+    if(name==="mouseleave"){timer.restart(continousM);}
+    console.log(name,dy);
+
+  };
+}
+
