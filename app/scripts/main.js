@@ -1,250 +1,218 @@
-//From : https://bl.ocks.org/mbostock/76456029b13c68accf6e
-var canvas = document.querySelector("canvas"),
-	width = canvas.width,
-	height = canvas.height,
-	context = canvas.getContext("2d"),
-	voronoi = d3_voronoi.voronoi().extent([
-		[0.5, 0.5],
-		[width - 0.5, height - 0.5]
-	]);
+var leVoronoi = d3.select('#leVoronoi');
+console.debug(leVoronoi);
+var width = parseInt(leVoronoi.style('width'), 10),
+    height = parseInt(leVoronoi.style('height'), 10);
 
+console.debug({
+    width: width,
+    height: height
+});
+/** Construct a responsive svg */
+var svg = leVoronoi.append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.select(window).on('resize', resize);
+var oldWidth, oldHeight;
+
+function resize() {
+    console.log('resize');
+    oldWidth = width;
+    oldHeight = height;
+    // update width
+    width = parseInt(leVoronoi.style('width'), 10);
+    height = parseInt(leVoronoi.style('height'), 10);
+
+    svg.attr("width", width)
+        .attr("height", height);
+
+    vertices = vertices.map(function(e) {
+        return {
+            point: [e.point[0] * width / oldWidth, e.point[1] * height / oldHeight],
+            vx: 0,
+            vy: 0
+        };
+    });
+
+    diagram = buildVoronoi(vertices);
+    drawVoronoiDiagram(diagram);
+
+
+
+}
+
+function moveVertices(vertices) {
+    vertices = vertices.map(function(e) {
+        var p = e.point;
+        p[0] += e.vx;
+        if (p[0] < 0) p[0] = e.vx *= -1;
+        else if (p[0] > width) p[0] = width + (e.vx *= -1);
+        p[1] += e.vy;
+        if (p[1] < 0) p[1] = e.vy *= -1;
+        else if (p[1] > height) p[1] = height + (e.vy *= -1);
+
+        return {
+            point: p,
+            vx: e.vx + (0.1 * (Math.random() - .5) - 0.001 * e.vx),
+            vy: e.vy + (0.1 * (Math.random() - .5) - 0.001 * e.vy)
+        };
+    });
+    return vertices;
+
+    /*    verticesG.selectAll("circle")
+            .transition()
+            .attr("transform", function(d, i) {
+                d = vertices[i];
+                return "translate(" + d.point + ")";
+            })
+            .duration(30)
+            .attr("r", r)
+            .each('end', function() {
+                continousMoving();
+            });*/
+}
+
+/* Build n points */
 var n = 6,
-	particles = new Array(n),
-	radius = 12;
+    bloques = new Array(n);
 
-for (var i = 0; i < n; ++i) particles[i] = {
-	0: Math.random() * width,
-	1: Math.random() * height,
-	vx: 0,
-	vy: 0
-};
-console.debug(voronoi);
-
-d3_timer.timer(function(elapsed) {
-	for (var i = 0; i < n; ++i) {
-		var p = particles[i];
-		p[0] += p.vx;
-		if (p[0] < 0) p[0] = p.vx *= -1;
-		else if (p[0] > width) p[0] = width + (p.vx *= -1);
-		p[1] += p.vy;
-		if (p[1] < 0) p[1] = p.vy *= -1;
-		else if (p[1] > height) p[1] = height + (p.vy *= -1);
-		p.vx += 0.1 * (Math.random() - .5) - 0.01 * p.vx;
-		p.vy += 0.1 * (Math.random() - .5) - 0.01 * p.vy;
-	}
-
-	var cells = voronoi.polygons(particles);
-	context.clearRect(0, 0, width, height);
-
-	context.beginPath();
-	cells.forEach(function(cell) {
-		drawRoundedPolygon(cell, radius);
-	});
-	context.fillStyle = "#ddd";
-	context.fill();
-	context.lineWidth = 5;
-	context.strokeStyle = "#fff";
-	context.stroke();
-
-	context.beginPath();
-	cells.forEach(function(cell) {
-		drawPolygon(cell);
-	});
-	context.lineWidth = 1;
-	context.strokeStyle = "#aaa";
-	context.stroke();
-
-	context.beginPath();
-	particles.forEach(function(particle) {
-		drawPoint(particle);
-	});
-	context.fillStyle = "#000";
-	context.fill();
-	console.debug(cells,'cells');
-
+var vertices = d3.range(n).map(function(d) {
+    return {
+        point: [Math.random() * width, Math.random() * height],
+        vx: 0,
+        vy: 0
+    };
 });
 
-function drawPoint(point) {
-	context.moveTo(point[0] + 1.5, point[1]);
-	context.arc(point[0], point[1], 1.5, 0, 2 * Math.PI);
+
+
+var voronoi = new Voronoi();
+var bbox, sites;
+
+function buildVoronoi(vertices) {
+    bbox = { xl: 0, xr: width, yt: 0, yb: height }; // xl is x-left, xr is x-right, yt is y-top, and yb is y-bottom
+
+    sites = vertices.map(function(e) {
+        return { x: e.point[0], y: e.point[1] }
+    });
+    var diagram = voronoi.compute(sites, bbox);
+
+    return diagram;
 }
 
-function drawPolygon(points) {
-	context.moveTo(points[0][0], points[0][1]);
-	for (var i = 1, n = points.length; i < n; ++i) context.lineTo(points[i][0], points[i][1]);
-	context.closePath();
+//drawVerices(diagram.vertices);
+var diagram = buildVoronoi(vertices);
+drawVoronoiDiagram(diagram);
+
+
+function drawVoronoiDiagram(diagram) {
+
+    var polygons = [];
+
+    diagram.cells.map(function(cell) {
+        var p = [];
+        var v = cell.halfedges[0].getStartpoint();
+        p.push([v.x, v.y]);
+        cell.halfedges.map(function(hE) {
+            v = hE.getEndpoint();
+            p.push([v.x, v.y]);
+            return
+        });
+        polygons.push(p);
+    });
+    drawPolygon(polygons);
+    drawSites(sites);
+
+    return polygons;
 }
 
-function drawRoundedPolygon(points, r) {
-	var i,
-		n = points.length,
-		p0,
-		p1,
-		p2,
-		p3,
-		n1 = 0,
-		t012,
-		t123,
-		x21, y21,
-		x4, y4,
-		x5, y5,
-		moved,
-		circle = polygonIncircle(points);
+// drawPolygon(polygons);
 
-	// Build a linked list from the array of vertices so we can splice.
-	for (i = 0, p1 = points[n - 2], p2 = points[n - 1]; i < n; ++i) {
-		p0 = p1, p1 = p2, p2 = points[i];
-		p1.previous = p0;
-		p1.next = p2;
-	}
-
-	// The rounding radius can’t be bigger than the polygon’s incircle.
-	// The fudge factor of 1px lets the rounded polygon get squished a bit.
-	// TODO Abort the search for the incircle if one is found larger than r.
-	r = Math.min(r, circle.radius - 1);
-	if (r <= 0) return;
-
-	// TODO do we need to make all these extra passes?
-	for (i = 0, p3 = p2.next; n1 <= n; ++n1) {
-		p0 = p1, p1 = p2, p2 = p3, p3 = p3.next;
-		t012 = cornerTangent(p0[0], p0[1], p1[0], p1[1], p2[0], p2[1], r);
-		t123 = 1 - cornerTangent(p3[0], p3[1], p2[0], p2[1], p1[0], p1[1], r);
-
-		// If the following corner’s tangent is before this corner’s tangent,
-		// replace p1 and p2 with the intersection of the lines 01 and 23.
-		if (t012 >= t123) {
-			p2 = p0.next = p3.previous = lineLineIntersection(p0[0], p0[1], p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]);
-			p2.previous = p0;
-			p2.next = p3;
-			p3 = p2;
-			p2 = p3.previous;
-			p1 = p2.previous;
-			p0 = p1.previous;
-			n1 = 0;
-			if (--n < 3) break;
-		}
-	}
-
-	// If we removed too many points, just draw the previously computed incircle.
-	if (n < 3) {
-		context.moveTo(circle[0] + circle.radius, circle[1]);
-		context.arc(circle[0], circle[1], circle.radius, 0, 2 * Math.PI);
-		return;
-	}
-
-	// Draw the rounded polygon, compting the corner tangents.
-	for (i = 0; i <= n; ++i) {
-		p0 = p1, p1 = p2, p2 = p3, p3 = p3.next;
-		t012 = cornerTangent(p0[0], p0[1], p1[0], p1[1], p2[0], p2[1], r);
-		t123 = 1 - cornerTangent(p3[0], p3[1], p2[0], p2[1], p1[0], p1[1], r);
-		x21 = p2[0] - p1[0], y21 = p2[1] - p1[1];
-		x4 = p1[0] + t012 * x21, y4 = p1[1] + t012 * y21;
-		x5 = p1[0] + t123 * x21, y5 = p1[1] + t123 * y21;
-		if (moved) context.arcTo(p1[0], p1[1], x4, y4, r);
-		else moved = true, context.moveTo(x4, y4);
-		context.lineTo(x5, y5);
-	}
+function drawSites(sites) {
+    var sitesG = svg.append("g");
+    var r = 5;
+    sitesG.selectAll(".sites")
+        .data(sites)
+        .enter()
+        .append("g")
+        .attr("transform", function(d, i) {
+            return "translate(" + d.x + ',' + d.y + ")";
+        })
+        .append("circle")
+        .attr("fill", 'blue')
+        .attr("r", r);
 }
 
-// Given a circle of radius r that is tangent to the line segments 01 and 12,
-// returns the parameter t of the tangent along the line segment 12.
-function cornerTangent(x0, y0, x1, y1, x2, y2, r) {
-	var theta = innerAngle(x0, y0, x1, y1, x2, y2),
-		x21 = x2 - x1,
-		y21 = y2 - y1,
-		l21 = Math.sqrt(x21 * x21 + y21 * y21),
-		l14 = r / Math.tan(theta / 2);
-	return l14 / l21;
+function drawVerices(sites) {
+    var sitesG = svg.append("g");
+    var r = 3;
+    sitesG.selectAll(".sites")
+        .data(sites)
+        .enter()
+        .append("g")
+        .attr("transform", function(d, i) {
+            console.log(i, d);
+            return "translate(" + d.x + ',' + d.y + ")";
+        })
+        .append("circle")
+        .attr("fill", 'green')
+        .attr("r", r);
 }
 
-// A horrible brute-force algorithm for determining the largest circle that can
-// fit inside a convex polygon. For each distinct set of three sides of the
-// polygon, compute the tangent circle. Then reduce the circle’s radius against
-// the remaining sides of the polygon.
-function polygonIncircle(points) {
-	var circle = {
-		radius: 0
-	};
+//var path = svg.append("g").selectAll("path");
 
-	for (var i = 0, n = points.length; i < n; ++i) {
-		var pi0 = points[i],
-			pi1 = points[(i + 1) % n];
-		for (var j = i + 1; j < n; ++j) {
-			var pj0 = points[j],
-				pj1 = points[(j + 1) % n],
-				pij = j === i + 1 ? pj0 : lineLineIntersection(pi0[0], pi0[1], pi1[0], pi1[1], pj0[0], pj0[1], pj1[0], pj1[1]);
-			search: for (var k = j + 1; k < n; ++k) {
-				var pk0 = points[k],
-					pk1 = points[(k + 1) % n],
-					pik = lineLineIntersection(pi0[0], pi0[1], pi1[0], pi1[1], pk0[0], pk0[1], pk1[0], pk1[1]),
-					pjk = k === j + 1 ? pk0 : lineLineIntersection(pj0[0], pj0[1], pj1[0], pj1[1], pk0[0], pk0[1], pk1[0], pk1[1]),
-					candidate = triangleIncircle(pij[0], pij[1], pik[0], pik[1], pjk[0], pjk[1]),
-					radius = candidate.radius;
+function drawPolygon(polygon) {
+    var path = svg.append("g").selectAll("path");
 
-				for (var l = 0; l < n; ++l) {
-					var pl0 = points[l],
-						pl1 = points[(l + 1) % n],
-						r = pointLineDistance(candidate[0], candidate[1], pl0[0], pl0[1], pl1[0], pl1[1]);
-					if (r < circle.radius) continue search;
-					if (r < radius) radius = r;
-				}
+    path = path
+        .data(polygon, polygonF);
+    path.exit()
+    path.enter()
+        .append("path")
+        .attr("class", function(d, i) {
+            return "celula q" + (i % 9) + "-9";
+        })
+        .attr("d", polygonF);
 
-				circle = candidate;
-				circle.radius = radius;
-			}
-		}
-	}
-
-	return circle;
+    path.order();
 }
 
-// Returns the angle between segments 01 and 12.
-function innerAngle(x0, y0, x1, y1, x2, y2) {
-	var x01 = x0 - x1,
-		y01 = y0 - y1,
-		x12 = x1 - x2,
-		y12 = y1 - y2,
-		x02 = x0 - x2,
-		y02 = y0 - y2,
-		l01_2 = x01 * x01 + y01 * y01,
-		l12_2 = x12 * x12 + y12 * y12,
-		l02_2 = x02 * x02 + y02 * y02;
-	return Math.acos((l12_2 + l01_2 - l02_2) / (2 * Math.sqrt(l12_2 * l01_2)));
+
+function polygonF(d) {
+    return "M" + d.join("L") + "Z";
 }
 
-// Returns the intersection of the infinite lines 01 and 23.
-function lineLineIntersection(x0, y0, x1, y1, x2, y2, x3, y3) {
-	var x02 = x0 - x2,
-		y02 = y0 - y2,
-		x10 = x1 - x0,
-		y10 = y1 - y0,
-		x32 = x3 - x2,
-		y32 = y3 - y2,
-		t = (x32 * y02 - y32 * x02) / (y32 * x10 - x32 * y10);
-	return [x0 + t * x10, y0 + t * y10];
+/* Animación continua*/
+function continousM(elapsed) {
+    svg.selectAll("g").remove();
+    // console.log(elapsed - total_time);
+    console.log('c');
+    total_time = elapsed;
+    vertices = moveVertices(vertices);
+/*    sites = vertices.map(function(e) {
+        return { x: e.point[0], y: e.point[1] }
+    });
+    drawSites(sites);
+*/
+     diagram = buildVoronoi(vertices);
+     drawVoronoiDiagram(diagram);
 }
 
-// Returns the signed distance from point 0 to the infinite line 12.
-function pointLineDistance(x0, y0, x1, y1, x2, y2) {
-	var x21 = x2 - x1,
-		y21 = y2 - y1;
-	return (y21 * x0 - x21 * y0 + x2 * y1 - y2 * x1) / Math.sqrt(y21 * y21 + x21 * x21);
+var total_time;
+var timer = d3_timer.timer(continousM);
+
+svg.on("mouseenter", flash("mouseenter", "-1em"))
+    .on("mouseover", flash("mouseover", "0"))
+    .on("mouseout",  flash("mouseout", "1em"))
+    .on("mouseleave", flash("mouseleave", "2em"));
+
+function flash(name, dy) {
+   // timer.stop();
+  return function() {
+    if(name==="mouseenter"){timer.stop();}
+    if(name==="mouseleave"){timer.restart(continousM);}
+    console.log(name,dy);
+
+  };
 }
 
-// Returns the largest circle inside the triangle 012.
-function triangleIncircle(x0, y0, x1, y1, x2, y2) {
-	var x01 = x0 - x1,
-		y01 = y0 - y1,
-		x02 = x0 - x2,
-		y02 = y0 - y2,
-		x12 = x1 - x2,
-		y12 = y1 - y2,
-		l01 = Math.sqrt(x01 * x01 + y01 * y01),
-		l02 = Math.sqrt(x02 * x02 + y02 * y02),
-		l12 = Math.sqrt(x12 * x12 + y12 * y12),
-		k0 = l01 / (l01 + l02),
-		k1 = l12 / (l12 + l01),
-		center = lineLineIntersection(x0, y0, x1 - k0 * x12, y1 - k0 * y12, x1, y1, x2 + k1 * x02, y2 + k1 * y02);
-	center.radius = Math.sqrt((l02 + l12 - l01) * (l12 + l01 - l02) * (l01 + l02 - l12) / (l01 + l02 + l12)) / 2;
-	return center;
-}
