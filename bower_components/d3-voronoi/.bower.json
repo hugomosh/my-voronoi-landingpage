@@ -1,0 +1,14 @@
+{
+  "name": "d3-voronoi",
+  "homepage": "https://github.com/d3/d3-voronoi",
+  "version": "0.3.2",
+  "_release": "0.3.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.2",
+    "commit": "a0b72cd61d3578e088dc5d0e52e796476c3aaafe"
+  },
+  "_source": "https://github.com/d3/d3-voronoi.git",
+  "_target": "^0.3.2",
+  "_originalSource": "d3-voronoi"
+}

@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "main.css",
+	"sources": [
+		"../../app/styles/main.scss"
+	],
+	"sourcesContent": [
+		"// bower:scss\n// endbower\n\nbody{\n  margin:0px;\n}\n\n#leVoronoi{\n  overflow: hidden;\n  width: 100%;\n  height: 100%;\n  max-width: 100vw;\n  max-height: 100vh;\n  background-color:pink;\n  width: 100vw;\n  height: 100vh;\n}\n\npath {\n  stroke: #fff;\n}\n\n\n\ncircle {\n  pointer-events: none;\n}\n\n.celula:hover{\n  fill: blue; \n}\n\n.q0-9 { fill: rgb(197,27,125); }\n.q1-9 { fill: rgb(222,119,174); }\n.q2-9 { fill: rgb(241,182,218); }\n.q3-9 { fill: rgb(253,224,239); }\n.q4-9 { fill: rgb(247,247,247); }\n.q5-9 { fill: rgb(230,245,208); }\n.q6-9 { fill: rgb(184,225,134); }\n.q7-9 { fill: rgb(127,188,65); }\n.q8-9 { fill: rgb(77,146,33); }\n\n\n.q0-9 { fill: #E3F2FD; }\n.q1-9 { fill: #BBDEFB; }\n.q2-9 { fill: #90CAF9; }\n.q3-9 { fill: #64B5F6; }\n.q4-9 { fill: #42A5F5; }\n.q5-9 { fill: #2196F3; }\n.q6-9 { fill: #1E88E5; }\n.q7-9 { fill: #1976D2; }\n.q8-9 { fill: #1565C0;}\n\n"
+	],
+	"mappings": "AAGA,AAAA,IAAI,CAAA;EACF,MAAM,EAAC,GAAI,GACZ;;AAED,AAAA,UAAU,CAAA;EACR,QAAQ,EAAE,MAAO;EACjB,KAAK,EAAE,IAAK;EACZ,MAAM,EAAE,IAAK;EACb,SAAS,EAAE,KAAM;EACjB,UAAU,EAAE,KAAM;EAClB,gBAAgB,EAAC,IAAK;EACtB,KAAK,EAAE,KAAM;EACb,MAAM,EAAE,KAAM,GACf;;AAED,AAAA,IAAI,CAAC;EACH,MAAM,EAAE,IAAK,GACd;;AAID,AAAA,MAAM,CAAC;EACL,cAAc,EAAE,IAAK,GACtB;;AAED,AAAO,OAAA,AAAA,MAAM,CAAA;EACX,IAAI,EAAE,IAAK,GACZ;;AAED,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAgB;;AACjC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAiB;;AAClC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAiB;;AAClC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAiB;;AAClC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAiB;;AAClC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAiB;;AAClC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAiB;;AAClC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAgB;;AACjC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAG,GAAe;;AAGhC,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAI;;AAC1B,AAAA,KAAK,CAAC;EAAE,IAAI,EAAE,OAAQ,GAAG",
+	"names": []
+}

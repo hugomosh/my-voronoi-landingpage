@@ -1,0 +1,15 @@
+{
+  "name": "d3-timer",
+  "homepage": "https://github.com/d3/d3-timer",
+  "version": "0.4.3",
+  "_release": "0.4.3",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.4.3",
+    "commit": "2a26622b10aa15d9aff8fdbe55e21ba0d80ceb2e"
+  },
+  "_source": "https://github.com/d3/d3-timer.git",
+  "_target": "^0.4.3",
+  "_originalSource": "d3-timer",
+  "_direct": true
+}
