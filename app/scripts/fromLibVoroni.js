@@ -34,6 +34,11 @@ function resize() {
         };
     });
 
+    diagram = buildVoronoi(vertices);
+    drawVoronoiDiagram(diagram);
+
+
+
 }
 
 function continousMoving() {
@@ -79,17 +84,69 @@ var vertices = d3.range(n).map(function(d) {
 });
 
 
+
 var voronoi = new Voronoi();
-var bbox = { xl: 0, xr: width, yt: 0, yb: height }; // xl is x-left, xr is x-right, yt is y-top, and yb is y-bottom
-var sites = [{ x: 200, y: 200 }, { x: 50, y: 250 }, { x: 400, y: 100 }];
-sites = vertices.map(function(e) {
-    return { x: e.point[0], y: e.point[1] }
+
+function buildVoronoi(vertices) {
+    var bbox = { xl: 0, xr: width, yt: 0, yb: height }; // xl is x-left, xr is x-right, yt is y-top, and yb is y-bottom
+
+    var sites = vertices.map(function(e) {
+        return { x: e.point[0], y: e.point[1] }
+    });
+
+    var diagram = voronoi.compute(sites, bbox);
+
+    return diagram;
+}
+
+//drawVerices(diagram.vertices);
+var diagram = buildVoronoi(vertices);
+drawVoronoiDiagram(diagram);
+
+
+
+/*var polygons = [];
+var path = svg.append("g").selectAll("path");
+
+diagram.cells.map(function(cell) {
+    var p = [];
+    var v = cell.halfedges[0].getStartpoint();
+    p.push([v.x, v.y]);
+    cell.halfedges.map(function(hE) {
+        console.log(hE);
+        v = hE.getEndpoint();
+        p.push([v.x, v.y]);
+        return
+    });
+    polygons.push(p);
 });
 
-var diagram = voronoi.compute(sites, bbox);
-console.log(diagram);
+*/
+function drawVoronoiDiagram(diagram) {
+
+    var polygons = [];
+
+    diagram.cells.map(function(cell) {
+        var p = [];
+        var v = cell.halfedges[0].getStartpoint();
+        p.push([v.x, v.y]);
+        cell.halfedges.map(function(hE) {
+            console.log(hE);
+            v = hE.getEndpoint();
+            p.push([v.x, v.y]);
+            return
+        });
+        polygons.push(p);
+    });
+    drawPolygon(polygons);
+
+    return polygons;
+}
 
 
+
+
+// drawPolygon(polygons);
 
 function drawSites(sites) {
     var sitesG = svg.append("g");
@@ -123,17 +180,19 @@ function drawVerices(sites) {
         .attr("r", r);
 }
 
-var path = svg.append("g").selectAll("path");
+//var path = svg.append("g").selectAll("path");
 
 function drawPolygon(polygon) {
+    var path = svg.append("g").selectAll("path");
+
     path = path
         .data(polygon, polygonF);
-
-    path.exit().remove();
-
-    path.enter().append("path")
+    path.exit()
+    path.enter()
+        .append("path")
         .attr("class", function(d, i) {
-            return "q" + (i % 9) + "-9"; })
+            return "celula q" + (i % 9) + "-9";
+        })
         .attr("d", polygonF);
 
     path.order();
@@ -145,20 +204,3 @@ function polygonF(d) {
 }
 
 //drawSites(sites);
-//drawVerices(diagram.vertices);
-var polygons = [];
-diagram.cells.map(function(cell) {
-    var p = [];
-    var v = cell.halfedges[0].getStartpoint();
-    p.push([v.x, v.y]);
-    cell.halfedges.map(function(hE) {
-        console.log(hE);
-        v = hE.getEndpoint();
-        p.push([v.x, v.y]);
-        return
-    });
-    polygons.push(p);
-});
-
-
-drawPolygon(polygons);
